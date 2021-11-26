@@ -143,7 +143,7 @@ export default {
     <header class="row">
       <div class="col span-12">
         <h1>
-          <t k="monitoring.overview.title" />
+          Kafka dashboard
         </h1>
         <div>
           <t k="monitoring.overview.subtitle" :raw="true" />
