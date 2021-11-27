@@ -29,17 +29,17 @@ export function init(store) {
   });
 
   virtualType({
-    label:         'Create',
+    label:         'Service',
     group:         'kafka',
-    name:     'create',
+    name:     'service',
     icon:     'globe',
-    route: { name: 'c-cluster-kafka-create' }
+    route: { name: 'c-cluster-kafka-service' }
   });
 
-  configureType('create', { showListMasthead: false });
+  configureType('service', { showListMasthead: false });
 
   basicType([
     'kafka',
-    'create',
+    'service',
   ]);
 }

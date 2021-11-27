@@ -38,7 +38,7 @@ export default {
       const activeResource = this.$refs?.tabs?.activeTabName || this.routeSchema.id;
 
       return {
-        name:   'c-cluster-kafka-create',
+        name:   'c-cluster-kafka-service',
         params: { cluster: this.$route.params.cluster },
         query:  { resource: activeResource }
       };
