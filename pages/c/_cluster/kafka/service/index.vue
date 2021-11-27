@@ -6,6 +6,7 @@ import TypeDescription from '@/components/TypeDescription';
 
 import ResourceTable from '@/components/ResourceTable';
 import { MONITORING } from '@/config/types';
+import { KAFKA } from '@/config/types';
 import { allHash } from '@/utils/promise';
 export default {
   components: {
@@ -13,15 +14,15 @@ export default {
   },
 
   async fetch() {
-    this.podMonitorSchema = this.$store.getters['cluster/schemaFor'](MONITORING.PODMONITOR);
+    this.kafkaService = this.$store.getters['cluster/schemaFor'](KAFKA.SERVICE);
     this.serviceMonitorSchema = this.$store.getters['cluster/schemaFor'](MONITORING.SERVICEMONITOR);
 
     const hash = await allHash( {
-      podMonitors:     this.$store.dispatch('cluster/findAll', { type: MONITORING.PODMONITOR } ),
+      kafkaServices:     this.$store.dispatch('cluster/findAll', { type: MONITORING.PODMONITOR } ),
       serviceMonitors: this.$store.dispatch('cluster/findAll', { type: MONITORING.SERVICEMONITOR } )
     });
 
-    this.podMonitors = hash.podMonitors;
+    this.kafkaServices = hash.kafkaServices;
     this.serviceMonitors = hash.serviceMonitors;
   },
 
@@ -29,7 +30,7 @@ export default {
     const initTab = this.$route.query.resource || MONITORING.SPOOFED.PODMONITOR;
 
     return {
-      podMonitors: [], serviceMonitors: [], podMonitorSchema: null, serviceMonitorSchema: null, initTab
+      kafkaServices: [], serviceMonitors: [], kafkaService: null, serviceMonitorSchema: null, initTab
     };
   },
 
@@ -38,7 +39,7 @@ export default {
       const activeResource = this.$refs?.tabs?.activeTabName || this.routeSchema.id;
 
       return {
-        name:   'c-cluster-kafka-service',
+        name:   'c-cluster-kafka-service-create',
         params: { cluster: this.$route.params.cluster },
         query:  { resource: activeResource }
       };
@@ -59,9 +60,9 @@ export default {
       </div>
     </div>
     <Tabbed ref="tabs" :default-tab="initTab">
-      <Tab :name="podMonitorSchema.id" :label="$store.getters['type-map/labelFor'](podMonitorSchema, 2)">
-        <TypeDescription :resource="podMonitorSchema.id" />
-        <ResourceTable :schema="podMonitorSchema" :rows="podMonitors" />
+      <Tab :name="kafkaService.id" :label="$store.getters['type-map/labelFor'](kafkaService, 2)">
+        <TypeDescription :resource="kafkaService.id" />
+        <ResourceTable :schema="kafkaService" :rows="kafkaServices" />
       </Tab>
       <Tab :name="serviceMonitorSchema.id" :label="$store.getters['type-map/labelFor'](serviceMonitorSchema, 2)">
         <TypeDescription :resource="serviceMonitorSchema.id" />

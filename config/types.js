@@ -120,6 +120,10 @@ export const MONITORING = {
   }
 };
 
+export const KAFKA = {
+  SERVICE:   'kafka.strimzi.io.kafka',
+};
+
 export const LONGHORN = {
   ENGINES:       'longhorn.io.engine',
   ENGINE_IMAGES: 'longhorn.io.engineimage',
