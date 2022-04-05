@@ -111,11 +111,14 @@ export default {
       const clusterProvider = this.currentCluster.status.provider || 'other';
       const enabledCharts = (this.allCharts || []);
 
+      // Tutaj są filtrowane charty pod Cluster Tools
+
       let charts = filterAndArrangeCharts(enabledCharts, {
         isWindows:      this.currentCluster.providerOs === 'windows',
         clusterProvider,
         showDeprecated: this.showDeprecated,
         showHidden:     this.showHidden,
+        // Jak to pozmieniać? Nie można zhardkodować tu repozytorium kafki, trzeba najpierw ją dodać do repo ranchera
         showRepos:      [this.rancherCatalog._key],
         showTypes:      [CATALOG_ANNOTATIONS._CLUSTER_TOOL],
       });
