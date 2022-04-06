@@ -120,9 +120,7 @@ export const MONITORING = {
   }
 };
 
-export const KAFKA = {
-  SERVICE:   'kafka.strimzi.io.kafka',
-};
+export const KAFKA = { SERVICE: 'kafka.strimzi.io.kafka' };
 
 export const LONGHORN = {
   ENGINES:       'longhorn.io.engine',

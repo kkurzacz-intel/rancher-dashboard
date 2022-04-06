@@ -5,8 +5,7 @@ import Tab from '@/components/Tabbed/Tab';
 import TypeDescription from '@/components/TypeDescription';
 
 import ResourceTable from '@/components/ResourceTable';
-import { MONITORING } from '@/config/types';
-import { KAFKA } from '@/config/types';
+import { KAFKA, MONITORING } from '@/config/types';
 import { allHash } from '@/utils/promise';
 export default {
   components: {
