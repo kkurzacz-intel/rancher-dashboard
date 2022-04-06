@@ -18,7 +18,7 @@ export default {
     this.serviceMonitorSchema = this.$store.getters['cluster/schemaFor'](MONITORING.SERVICEMONITOR);
 
     const hash = await allHash( {
-      kafkaServices:     this.$store.dispatch('cluster/findAll', { type: MONITORING.PODMONITOR } ),
+      kafkaServices:     this.$store.dispatch('cluster/findAll', { type: KAFKA.SERVICE } ),
       serviceMonitors: this.$store.dispatch('cluster/findAll', { type: MONITORING.SERVICEMONITOR } )
     });
 
