@@ -10,7 +10,7 @@ import SimpleBox from '@/components/SimpleBox';
 import LandingPagePreference from '@/components/LandingPagePreference';
 import SingleClusterInfo from '@/components/SingleClusterInfo';
 import { mapGetters, mapState } from 'vuex';
-import { MANAGEMENT, CAPI } from '@/config/types';
+import { MANAGEMENT, CAPI, KAFKA } from '@/config/types';
 import { NAME as MANAGER } from '@/config/product/manager';
 import { STATE } from '@/config/table-headers';
 import { MODE, _IMPORT } from '@/config/query-params';
@@ -48,6 +48,7 @@ export default {
       type: MANAGEMENT.CLUSTER,
       opt:  { url: MANAGEMENT.CLUSTER }
     });
+    this.kafkas = await this.$store.dispatch('cluster/findAll', { type: KAFKA.SERVICE });
   },
 
   data() {
@@ -66,7 +67,7 @@ export default {
     ];
 
     return {
-      HIDE_HOME_PAGE_CARDS, clusters: [], fullVersion, pageActions, vendor: getVendor(),
+      HIDE_HOME_PAGE_CARDS, clusters: [], kafkas: [], fullVersion, pageActions, vendor: getVendor(),
     };
   },
 
@@ -154,6 +155,24 @@ export default {
         //   name:  'explorer',
         //   label:  this.t('landing.clusters.explorer')
         // }
+      ];
+    },
+    kafkaHeaders() {
+      return [
+        STATE,
+        {
+          name:          'name',
+          labelKey:      'tableHeaders.name',
+          value:         'nameDisplay',
+          sort:          ['nameSort'],
+          canBeVariable: true,
+        },
+        {
+          label: this.t('landing.clusters.provider'),
+          value: 'status.provider',
+          name:  'Provider',
+          sort:  ['status.provider'],
+        },
       ];
     },
 
@@ -334,6 +353,41 @@ export default {
                     {{ t('landing.clusters.explore') }}
                   </button>
                 </template> -->
+              </SortableTable>
+              <br />
+              <SortableTable :table-actions="false" :row-actions="false" key-field="id" :rows="kafkas" :headers="kafkaHeaders">
+                <template #header-left>
+                  <div class="row table-heading">
+                    <h2 class="mb-0">
+                      Available kafkas
+                    </h2>
+                    <BadgeState :label="clusters.length.toString()" color="role-tertiary ml-20 mr-20" />
+                  </div>
+                </template>
+                <template #header-middle>
+                  <n-link
+                    :to="importLocation"
+                    class="btn btn-sm role-primary"
+                  >
+                    {{ t('cluster.importAction') }}
+                  </n-link>
+                  <n-link
+                    :to="createLocation"
+                    class="btn btn-sm role-primary"
+                  >
+                    {{ t('generic.create') }}
+                  </n-link>
+                </template>
+                <template #col:name="{row}">
+                  <td>
+                    <span>
+                      <n-link v-if="row.isReady" :to="{ name: 'c-cluster-explorer', params: { cluster: row.id }}">
+                        {{ row.nameDisplay }}
+                      </n-link>
+                      <span v-else>{{ row.nameDisplay }}</span>
+                    </span>
+                  </td>
+                </template>
               </SortableTable>
             </div>
             <div v-else class="col span-12">
