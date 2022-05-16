@@ -5,7 +5,7 @@ import Tab from '@/components/Tabbed/Tab';
 import TypeDescription from '@/components/TypeDescription';
 
 import ResourceTable from '@/components/ResourceTable';
-import { KAFKA, MONITORING } from '@/config/types';
+import { KAFKA } from '@/config/types';
 import { allHash } from '@/utils/promise';
 export default {
   components: {
@@ -14,22 +14,17 @@ export default {
 
   async fetch() {
     this.kafkaService = this.$store.getters['cluster/schemaFor'](KAFKA.SERVICE);
-    this.serviceMonitorSchema = this.$store.getters['cluster/schemaFor'](MONITORING.SERVICEMONITOR);
 
-    const hash = await allHash( {
-      kafkaServices:     this.$store.dispatch('cluster/findAll', { type: KAFKA.SERVICE } ),
-      serviceMonitors: this.$store.dispatch('cluster/findAll', { type: MONITORING.SERVICEMONITOR } )
-    });
+    const hash = await allHash( { kafkaServices: this.$store.dispatch('cluster/findAll', { type: KAFKA.SERVICE } ) });
 
     this.kafkaServices = hash.kafkaServices;
-    this.serviceMonitors = hash.serviceMonitors;
   },
 
   data() {
-    const initTab = this.$route.query.resource || MONITORING.SPOOFED.PODMONITOR;
+    const initTab = this.$route.query.resource || KAFKA.SERVICE;
 
     return {
-      kafkaServices: [], serviceMonitors: [], kafkaService: null, serviceMonitorSchema: null, initTab
+      kafkaServices: [], kafkaService: null, initTab
     };
   },
 
@@ -62,10 +57,6 @@ export default {
       <Tab :name="kafkaService.id" :label="$store.getters['type-map/labelFor'](kafkaService, 2)">
         <TypeDescription :resource="kafkaService.id" />
         <ResourceTable :schema="kafkaService" :rows="kafkaServices" />
-      </Tab>
-      <Tab :name="serviceMonitorSchema.id" :label="$store.getters['type-map/labelFor'](serviceMonitorSchema, 2)">
-        <TypeDescription :resource="serviceMonitorSchema.id" />
-        <ResourceTable :schema="serviceMonitorSchema" :rows="serviceMonitors" />
       </Tab>
     </Tabbed>
   </div>
