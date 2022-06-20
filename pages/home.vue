@@ -1,7 +1,4 @@
 <script>
-
-/* eslint-disable */
-
 import { mapPref, AFTER_LOGIN_ROUTE, READ_WHATS_NEW, HIDE_HOME_PAGE_CARDS } from '@/store/prefs';
 import Banner from '@/components/Banner';
 import BannerGraphic from '@/components/BannerGraphic';
@@ -13,7 +10,7 @@ import SimpleBox from '@/components/SimpleBox';
 import LandingPagePreference from '@/components/LandingPagePreference';
 import SingleClusterInfo from '@/components/SingleClusterInfo';
 import { mapGetters, mapState } from 'vuex';
-import { MANAGEMENT, CAPI, KAFKA } from '@/config/types';
+import { MANAGEMENT, CAPI } from '@/config/types';
 import { NAME as MANAGER } from '@/config/product/manager';
 import { STATE } from '@/config/table-headers';
 import { MODE, _IMPORT } from '@/config/query-params';
@@ -52,71 +49,45 @@ export default {
       opt:  { url: MANAGEMENT.CLUSTER }
     });
 
-    // const kubeclusters = filterOnlyKubernetesClusters(this.clusters)
-    console.log("Clusters:");
-    console.log(this.clusters);
-
-    // var clusterIds = [];
-    // kubeclusters.forEach(cluster => {
-    //   clusterIds.push(cluster.id);
-    // });
-
-    // console.log("Cluster IDS:");
-    // console.log(clusterIds);
-
+    const kubeclusters = filterOnlyKubernetesClusters(this.clusters);
 
     this.myKafkas = [];
 
-    for (const cluster of this.clusters) {
+    for (const cluster of kubeclusters) {
       try {
         const clusterId = cluster.id;
         const clusterName = cluster.spec.displayName;
-        console.log("Cluster name: " + clusterName);
 
         const myservices = await this.$store.dispatch('rancher/request', {
-        url: `/k8s/clusters/` + clusterId + `/v1/services`,
-        method: 'get',
+          url:    `/k8s/clusters/${ clusterId }/v1/services`,
+          method: 'get',
         });
 
-        console.log("Received services");
-      console.log(myservices);
-      myservices.data.forEach(serviceObj => {
+        myservices.data.forEach((serviceObj) => {
+          let flagDiscoverable = false;
+          let flagKindIfKafka = false;
 
-      var flagA = false;
-      var flagB = false;
+          if (Object.prototype.hasOwnProperty.call(serviceObj.metadata, 'labels')) {
+            if (Object.prototype.hasOwnProperty.call(serviceObj.metadata.labels, 'strimzi.io/discovery')) {
+              if (serviceObj.metadata.labels['strimzi.io/discovery'] === 'true') {
+                flagDiscoverable = true;
+              }
+            }
 
-      if (serviceObj.metadata.hasOwnProperty('labels')) {
-        if (serviceObj.metadata.labels.hasOwnProperty("strimzi.io/discovery"))
-          if (serviceObj.metadata.labels["strimzi.io/discovery"] === "true")
-            flagA = true;
+            if (Object.prototype.hasOwnProperty.call(serviceObj.metadata.labels, 'strimzi.io/kind')) {
+              if (serviceObj.metadata.labels['strimzi.io/kind'] === 'Kafka') {
+                flagKindIfKafka = true;
+              }
+            }
+          }
 
-        if (serviceObj.metadata.labels.hasOwnProperty("strimzi.io/kind"))
-          if (serviceObj.metadata.labels["strimzi.io/kind"] === "Kafka")
-            flagB = true;
-      }
-
-      if ((flagA && flagB) === true) {
-        serviceObj.metadata.cluster = clusterName;
-        this.myKafkas.push(serviceObj);
-      }
-
-      });
-      } catch (ex) {
-        console.log(ex);
-      }
-
+          if ((flagDiscoverable && flagKindIfKafka) === true) {
+            serviceObj.metadata.cluster = clusterName;
+            this.myKafkas.push(serviceObj);
+          }
+        });
+      } catch (ex) {}
     }
-
-
-    console.log("FILTERED KAFKAS");
-    console.log(this.myKafkas);
-
-
-
-    this.kafkas = await this.$store.dispatch('cluster/findAll', { type: KAFKA.SERVICE });
-    console.log("Received kafkas");
-    console.log(this.kafkas);
-
   },
 
   data() {
@@ -236,7 +207,7 @@ export default {
           canBeVariable: true,
         },
         {
-          label: 'Klaster',  // TODO: Get label from translations
+          label: 'Klaster', // TODO: Get label from translations
           value: 'metadata.cluster',
           name:  'Cluster',
           sort:  ['metadata.cluster'],
