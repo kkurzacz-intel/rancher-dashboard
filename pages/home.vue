@@ -198,7 +198,6 @@ export default {
     },
     kafkaHeaders() {
       return [
-        STATE,
         {
           name:          'name',
           labelKey:      'tableHeaders.name',
@@ -207,10 +206,34 @@ export default {
           canBeVariable: true,
         },
         {
-          label: 'Klaster', // TODO: Get label from translations
+          label: this.t('tableHeaders.cluster'),
           value: 'metadata.cluster',
           name:  'Cluster',
           sort:  ['metadata.cluster'],
+        },
+        {
+          label: this.t('tableHeaders.namespace'),
+          value: 'metadata.namespace',
+          name:  'Namespace',
+          sort:  ['metadata.namespace'],
+        },
+        {
+          label: this.t('tableHeaders.serviceType'),
+          value: 'spec.type',
+          name:  'ServiceType',
+          sort:  ['spec.type'],
+        },
+        {
+          label: this.t('tableHeaders.address'),
+          value: 'spec.clusterIP',
+          name:  'ClusterIP',
+          sort:  ['spec.clusterIP'],
+        },
+        {
+          label: this.t('tableHeaders.port'),
+          value: 'spec.ports.1.port', // port type: tcp-clients
+          name:  'Port',
+          sort:  ['spec.ports.1.port'],
         },
 
       ];
@@ -401,7 +424,7 @@ export default {
                     <h2 class="mb-0">
                       Available kafkas
                     </h2>
-                    <BadgeState :label="clusters.length.toString()" color="role-tertiary ml-20 mr-20" />
+                    <BadgeState :label="myKafkas.length.toString()" color="role-tertiary ml-20 mr-20" />
                   </div>
                 </template>
                 <template #header-middle>

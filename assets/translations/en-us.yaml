@@ -4091,6 +4091,7 @@ tableHeaders:
   clusterCreatorDefault: Cluster Creator Default
   clusterFlow: Cluster Flow
   clusterOutput: Cluster Output
+  cluster: Cluster
   clusters: Clusters
   clustersReady: Clusters Ready
   clusterGroups: Cluster Groups
@@ -4180,6 +4181,7 @@ tableHeaders:
   scale: Scale
   scope: Scope
   selector: Selector
+  serviceType: Service type
   simpleName: Name
   simpleScale: Scale
   simpleType: Type
