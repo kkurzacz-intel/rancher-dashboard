@@ -422,7 +422,7 @@ export default {
                 <template #header-left>
                   <div class="row table-heading">
                     <h2 class="mb-0">
-                      Available kafkas
+                      {{ t('landing.kafkas.title') }}
                     </h2>
                     <BadgeState :label="myKafkas.length.toString()" color="role-tertiary ml-20 mr-20" />
                   </div>
