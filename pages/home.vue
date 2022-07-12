@@ -48,6 +48,46 @@ export default {
       type: MANAGEMENT.CLUSTER,
       opt:  { url: MANAGEMENT.CLUSTER }
     });
+
+    const kubeclusters = filterOnlyKubernetesClusters(this.clusters);
+
+    this.myKafkas = [];
+
+    for (const cluster of kubeclusters) {
+      try {
+        const clusterId = cluster.id;
+        const clusterName = cluster.spec.displayName;
+
+        const myservices = await this.$store.dispatch('rancher/request', {
+          url:    `/k8s/clusters/${ clusterId }/v1/services`,
+          method: 'get',
+        });
+
+        myservices.data.forEach((serviceObj) => {
+          let flagDiscoverable = false;
+          let flagKindIfKafka = false;
+
+          if (Object.prototype.hasOwnProperty.call(serviceObj.metadata, 'labels')) {
+            if (Object.prototype.hasOwnProperty.call(serviceObj.metadata.labels, 'strimzi.io/discovery')) {
+              if (serviceObj.metadata.labels['strimzi.io/discovery'] === 'true') {
+                flagDiscoverable = true;
+              }
+            }
+
+            if (Object.prototype.hasOwnProperty.call(serviceObj.metadata.labels, 'strimzi.io/kind')) {
+              if (serviceObj.metadata.labels['strimzi.io/kind'] === 'Kafka') {
+                flagKindIfKafka = true;
+              }
+            }
+          }
+
+          if ((flagDiscoverable && flagKindIfKafka) === true) {
+            serviceObj.metadata.cluster = clusterName;
+            this.myKafkas.push(serviceObj);
+          }
+        });
+      } catch (ex) {}
+    }
   },
 
   data() {
@@ -66,7 +106,7 @@ export default {
     ];
 
     return {
-      HIDE_HOME_PAGE_CARDS, clusters: [], fullVersion, pageActions, vendor: getVendor(),
+      HIDE_HOME_PAGE_CARDS, clusters: [], myKafkas: [], fullVersion, pageActions, vendor: getVendor(),
     };
   },
 
@@ -154,6 +194,48 @@ export default {
         //   name:  'explorer',
         //   label:  this.t('landing.clusters.explorer')
         // }
+      ];
+    },
+    kafkaHeaders() {
+      return [
+        {
+          name:          'name',
+          labelKey:      'tableHeaders.name',
+          value:         'nameDisplay',
+          sort:          ['nameSort'],
+          canBeVariable: true,
+        },
+        {
+          label: this.t('tableHeaders.cluster'),
+          value: 'metadata.cluster',
+          name:  'Cluster',
+          sort:  ['metadata.cluster'],
+        },
+        {
+          label: this.t('tableHeaders.namespace'),
+          value: 'metadata.namespace',
+          name:  'Namespace',
+          sort:  ['metadata.namespace'],
+        },
+        {
+          label: this.t('tableHeaders.serviceType'),
+          value: 'spec.type',
+          name:  'ServiceType',
+          sort:  ['spec.type'],
+        },
+        {
+          label: this.t('tableHeaders.address'),
+          value: 'spec.clusterIP',
+          name:  'ClusterIP',
+          sort:  ['spec.clusterIP'],
+        },
+        {
+          label: this.t('tableHeaders.port'),
+          value: 'spec.ports.1.port', // port type: tcp-clients
+          name:  'Port',
+          sort:  ['spec.ports.1.port'],
+        },
+
       ];
     },
 
@@ -334,6 +416,38 @@ export default {
                     {{ t('landing.clusters.explore') }}
                   </button>
                 </template> -->
+              </SortableTable>
+              <br />
+              <SortableTable :table-actions="false" :row-actions="false" key-field="id" :rows="myKafkas" :headers="kafkaHeaders">
+                <template #header-left>
+                  <div class="row table-heading">
+                    <h2 class="mb-0">
+                      {{ t('landing.kafkas.title') }}
+                    </h2>
+                    <BadgeState :label="myKafkas.length.toString()" color="role-tertiary ml-20 mr-20" />
+                  </div>
+                </template>
+                <template #header-middle>
+                  <n-link
+                    :to="importLocation"
+                    class="btn btn-sm role-primary"
+                  >
+                    {{ t('cluster.importAction') }}
+                  </n-link>
+                  <n-link
+                    :to="createLocation"
+                    class="btn btn-sm role-primary"
+                  >
+                    {{ t('generic.create') }}
+                  </n-link>
+                </template>
+                <template #col:name="{row}">
+                  <td>
+                    <span>
+                      {{ row.metadata.name }}
+                    </span>
+                  </td>
+                </template>
               </SortableTable>
             </div>
             <div v-else class="col span-12">
